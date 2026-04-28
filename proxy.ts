@@ -2,7 +2,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-  function middleware(req) {
+  function proxy(req) {
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
@@ -11,14 +11,12 @@ export default withAuth(
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    // Role-based restrictions can be added here if certain dashboard pages are restricted
-    // e.g., Pilot only pages
+    // Role-based restrictions
     const pilotOnlyRoutes = ["/planner", "/live", "/job-sheets"];
     if (pilotOnlyRoutes.some(route => path.startsWith(route)) && token?.role === "CLIENT") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    // Client only pages
     const clientOnlyRoutes = ["/briefs/new"];
     if (clientOnlyRoutes.some(route => path.startsWith(route)) && token?.role === "PILOT") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
