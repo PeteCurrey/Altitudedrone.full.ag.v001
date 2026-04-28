@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
+import { Send, Mail, Globe, Map } from "lucide-react";
 
 export default function MarketingFooter() {
   return (
@@ -51,7 +51,7 @@ export default function MarketingFooter() {
               <p className="text-muted text-sm font-inter">+44 (0) 20 7946 0000</p>
             </div>
             <div className="flex gap-4">
-              {[Twitter, Linkedin, Instagram, Youtube].map((Icon, i) => (
+              {[Send, Mail, Globe, Map].map((Icon, i) => (
                 <Link key={i} href="#" className="w-9 h-9 rounded-lg bg-surface-dark border border-white/5 flex items-center justify-center text-muted hover:text-accent hover:border-accent/30 transition-all">
                   <Icon size={16} />
                 </Link>
