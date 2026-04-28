@@ -61,7 +61,7 @@ export default function MissionDispatchList() {
                   <h3 className="text-lg font-syne font-bold text-white">{mission.title}</h3>
                   
                   <div className="flex flex-wrap gap-4 text-xs text-muted font-inter">
-                    <div className="flex items-center gap-1.5"><User size={14} /> {mission.company}</div>
+                    <div className="flex items-center gap-1.5"><User size={14} /> {mission.client}</div>
                     <div className="flex items-center gap-1.5"><MapPin size={14} /> {mission.location}</div>
                     <div className="flex items-center gap-1.5"><Calendar size={14} /> {mission.date}</div>
                   </div>
