@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CLIENT
+  PILOT
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING_APPROVAL
+  PENDING_VERIFICATION
+  SUSPENDED
+}
+
+enum PilotCertType {
+  GVC
+  A2_COFC
+  PDRA01
+  SPECIFIC
+  OTHER
+}
+
+enum MissionStatus {
+  DRAFT
+  PENDING_DISPATCH
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  passwordHash  String
+  role          UserRole   @default(CLIENT)
+  status        UserStatus @default(PENDING_VERIFICATION)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  clientProfile ClientProfile?
+  pilotProfile  PilotProfile?
+}
+
+model ClientProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName     String
+  contactName     String
+  phone           String?
+  billingAddress  String?
+  totalJobsCount  Int      @default(0)
+  totalSpend      Decimal  @default(0) @db.Decimal(10, 2)
+
+  missions        Mission[]
+}
+
+model PilotProfile {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName                String
+  phone                   String?
+  city                    String?
+  postcode                String?
+  lat                     Float?
+  lng                     Float?
+  caaFlyerId              String?
+  caaOperatorId           String?
+  insuranceProvider       String?
+  insurancePolicyNumber   String?
+  insuranceExpiry         DateTime?
+  dbsChecked              Boolean  @default(false)
+  dbsDate                 DateTime?
+  status                  UserStatus @default(PENDING_APPROVAL)
+  rating                  Float    @default(5.0)
+  totalFlights            Int      @default(0)
+  joinedAt                DateTime @default(now())
+
+  certifications  PilotCertification[]
+  missions        Mission[]
+  flightLogs      FlightLog[]
+}
+
+model PilotCertification {
+  id            String        @id @default(cuid())
+  pilotId       String
+  pilot         PilotProfile  @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+  type          PilotCertType
+  issueDate     DateTime
+  expiryDate    DateTime
+  documentUrl   String?
+}
+
+model Mission {
+  id              String        @id @default(cuid())
+  title           String
+  category        String
+  status          MissionStatus @default(DRAFT)
+  clientId        String
+  client          ClientProfile @relation(fields: [clientId], references: [id])
+  pilotId         String?
+  pilot           PilotProfile? @relation(fields: [pilotId], references: [id])
+  address         String?
+  postcode        String?
+  lat             Float?
+  lng             Float?
+  targetDate      DateTime?
+  deliverables    String[]      // Array of deliverable IDs
+  goals           String?
+  aiBrief         String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  flightLogs      FlightLog[]
+}
+
+model FlightLog {
+  id              String   @id @default(cuid())
+  missionId       String
+  mission         Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  pilotId         String
+  pilot           PilotProfile @relation(fields: [pilotId], references: [id])
+  flightDate      DateTime @default(now())
+  durationMinutes Int
+  batteryUsed     String?
+  equipment       String?
+  weather         String?
+  notes           String?
+  mediaUrls       String[]
+}
